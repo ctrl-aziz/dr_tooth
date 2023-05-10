@@ -19,6 +19,6 @@ class Payment {
     return 'Payment{id: $id, amount: $amount, date: $date}';
   }
 
-  factory Payment.fromJson(Map<dynamic, dynamic> json) => _$PaymentFromJson(json);
+  factory Payment.fromJson(Map<String, dynamic> json) => _$PaymentFromJson(json);
   Map<String, dynamic> toJson() => _$PaymentToJson(this);
 }

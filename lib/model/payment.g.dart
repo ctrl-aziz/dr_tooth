@@ -6,9 +6,9 @@ part of 'payment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Payment _$PaymentFromJson(Map<dynamic, dynamic> json) => Payment(
+Payment _$PaymentFromJson(Map<String, dynamic> json) => Payment(
       id: json['id'] as String,
-      amount: (json['amount'] as num).toInt(),
+      amount: json['amount'] as int,
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );

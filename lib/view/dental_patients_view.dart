@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart' as intl;
 
+import '../constants/app_config.dart';
 import '../provider/patient_provider.dart';
 import '../widget/custom_search.dart';
 import 'add_patient_view.dart';
 import 'patient_view.dart';
+import 'settings_view.dart';
 
 class DentalPatientsView extends ConsumerWidget {
   const DentalPatientsView({Key? key}) : super(key: key);
@@ -19,6 +22,21 @@ class DentalPatientsView extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('تطبيق مرضى الأسنان'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingView(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.settings,
+              ),
+            ),
+          ],
         ),
         body: patients.when(
           data: (patients) {
@@ -61,7 +79,10 @@ class DentalPatientsView extends ConsumerWidget {
                             );
                           },
                           title: Text(item.name),
-                          subtitle: Text(item.debts.toString()),
+                          subtitle: Text(
+                            AppConfig.numWithCurrency(item.debts),
+                            style: AppConfig.numberStyle,
+                          ),
                           leading: Text((i + 1).toString()),
                           trailing:
                               Icon(age < 18 ? Icons.child_care : Icons.person),
@@ -93,4 +114,3 @@ class DentalPatientsView extends ConsumerWidget {
     );
   }
 }
-

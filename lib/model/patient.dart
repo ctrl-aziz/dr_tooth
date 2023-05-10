@@ -28,7 +28,7 @@ class Patient {
     debts = ((treatments.isEmpty) ? 0 : treatments.map((e) => e.cost).reduce((v, e) => v + e)) - ((payments.isEmpty) ? 0 : payments.map((e) => e.amount).reduce((v, e) => v + e));
   }
 
-  factory Patient.fromJson(Map<dynamic, dynamic> json) => _$PatientFromJson(json);
+  factory Patient.fromJson(Map<String, dynamic> json) => _$PatientFromJson(json);
   Map<String, dynamic> toJson() => _$PatientToJson(this);
 }
 

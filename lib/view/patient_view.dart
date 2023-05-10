@@ -2,6 +2,7 @@ import 'package:dr_tooth/model/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_colors.dart';
+import '../constants/app_config.dart';
 import '../model/patient.dart';
 import '../provider/patient_provider.dart';
 import '../widget/add_dialog/add_dialog.dart';
@@ -11,6 +12,7 @@ import '../widget/treatment_row.dart';
 
 class PatientView extends ConsumerWidget {
   final String id;
+
   const PatientView({Key? key, required this.id}) : super(key: key);
 
   @override
@@ -21,7 +23,7 @@ class PatientView extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: patient.when(
-        data: (patient){
+        data: (patient) {
           return Scaffold(
             body: SingleChildScrollView(
               child: SizedBox(
@@ -72,9 +74,10 @@ class PatientView extends ConsumerWidget {
                                   height: 10,
                                 ),
                                 PatientRow(
-                                  icon: Icons.attach_money,
-                                  text: '${patient.debts}',
-                                ),
+                                    icon: Icons.attach_money,
+                                    text: AppConfig.numWithCurrency(
+                                        patient.debts),
+                                    style: AppConfig.numberStyle),
                               ],
                             ),
                           ),
@@ -108,11 +111,10 @@ class PatientView extends ConsumerWidget {
                         itemBuilder: (context, i) {
                           return ListTile(
                             onTap: () {},
-                            title: Row(
-                              children: [
-                                const Icon(Icons.attach_money),
-                                Text("${patient.payments[i].amount}"),
-                              ],
+                            title: Text(
+                              AppConfig.numWithCurrency(
+                                  patient.payments[i].amount),
+                              style: AppConfig.numberStyle,
                             ),
                             subtitle: Row(
                               children: [
@@ -143,38 +145,38 @@ class PatientView extends ConsumerWidget {
                     return const Directionality(
                       textDirection: TextDirection.rtl,
                       child: AddDialog(
-                        // payments: patient.payments,
-                      ),
+                          // payments: patient.payments,
+                          ),
                     );
                   },
                 ).then((value) {
                   print("value.toString(): ${value.toString()}");
                   if (value is Payment) {
                     ref.read(patientStorageProvider).save(
-                      Patient(
-                        id: patient.id,
-                        name: patient.name,
-                        gender: patient.gender,
-                        age: patient.age,
-                        debts: patient.debts,
-                        phoneNumber: patient.phoneNumber,
-                        treatments: patient.treatments,
-                        payments: patient.payments..add(value),
-                      ).toJson(),
-                    );
-                  }else{
+                          Patient(
+                            id: patient.id,
+                            name: patient.name,
+                            gender: patient.gender,
+                            age: patient.age,
+                            debts: patient.debts,
+                            phoneNumber: patient.phoneNumber,
+                            treatments: patient.treatments,
+                            payments: patient.payments..add(value),
+                          ).toJson(),
+                        );
+                  } else {
                     ref.read(patientStorageProvider).save(
-                      Patient(
-                        id: patient.id,
-                        name: patient.name,
-                        gender: patient.gender,
-                        age: patient.age,
-                        debts: patient.debts,
-                        phoneNumber: patient.phoneNumber,
-                        treatments: patient.treatments..addAll(value),
-                        payments: patient.payments,
-                      ).toJson(),
-                    );
+                          Patient(
+                            id: patient.id,
+                            name: patient.name,
+                            gender: patient.gender,
+                            age: patient.age,
+                            debts: patient.debts,
+                            phoneNumber: patient.phoneNumber,
+                            treatments: patient.treatments..addAll(value),
+                            payments: patient.payments,
+                          ).toJson(),
+                        );
                   }
                   ref.refresh(patientProvider(id));
                   ref.refresh(patientListProvider);
@@ -184,11 +186,13 @@ class PatientView extends ConsumerWidget {
             ),
           );
         },
-        error: (e, s){
+        error: (e, s) {
           return const Center(child: Text('Error'));
         },
-        loading: (){
-          return const Center(child: CircularProgressIndicator(),);
+        loading: () {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         },
       ),
     );

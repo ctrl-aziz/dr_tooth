@@ -6,12 +6,12 @@ part of 'patient.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Patient _$PatientFromJson(Map<dynamic, dynamic> json) => Patient(
+Patient _$PatientFromJson(Map<String, dynamic> json) => Patient(
       id: json['id'] as String,
       name: json['name'] as String,
       gender: json['gender'] as String,
       age: json['age'] as int,
-      debts: (json['debts'] as num).toInt(),
+      debts: json['debts'] as int,
       phoneNumber: json['phoneNumber'] as String,
       treatments: (json['treatments'] as List<dynamic>)
           .map((e) => Treatment.fromJson(e as Map<String, dynamic>))

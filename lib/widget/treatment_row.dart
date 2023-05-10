@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_config.dart';
 import '../model/treatment.dart';
 
 class TreatmentRow extends StatelessWidget {
@@ -9,6 +10,7 @@ class TreatmentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(_treatment.date);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       child: Column(
@@ -27,7 +29,8 @@ class TreatmentRow extends StatelessWidget {
               ),
               const SizedBox(width: 5),
               Text(
-                _treatment.cost.toString(),
+                AppConfig.numWithCurrency(_treatment.cost),
+                style: AppConfig.numberStyle,
               ),
             ],
           ),

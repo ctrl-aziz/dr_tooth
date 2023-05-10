@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class PatientRow extends StatelessWidget {
   final IconData icon;
   final String text;
+  final TextStyle? style;
 
   const PatientRow({
     Key? key,
     required this.icon,
     required this.text,
+    this.style,
   }) : super(key: key);
 
   @override
@@ -24,6 +26,7 @@ class PatientRow extends StatelessWidget {
             text,
             textDirection:
             icon == Icons.phone ? TextDirection.ltr : TextDirection.rtl,
+            style: style,
           ),
         ],
       ),

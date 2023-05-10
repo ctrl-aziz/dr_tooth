@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import 'app_colors.dart';
 
@@ -11,6 +12,10 @@ class AppConfig {
   static TextStyle get _style => GoogleFonts.cairo(
     color: AppColors.textColor,
   );
+
+  static TextStyle get numberStyle => GoogleFonts.roboto();
+
+  static String numWithCurrency(number) => NumberFormat.currency(locale: 'ar', symbol: '₺').format(number);
 
   static ThemeData themeData = ThemeData(
     primarySwatch: _convertColor(AppColors.primaryColor),
@@ -48,6 +53,9 @@ class AppConfig {
         color: AppColors.textColor,
       ),
       color: AppColors.backgroundColor,
+      actionsIconTheme: const IconThemeData(
+        color: AppColors.accentColor,
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       labelStyle: _style.copyWith(fontSize: 13)

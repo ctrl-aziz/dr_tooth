@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_config.dart';
 import '../../data.dart';
 import 'treatment_form_model.dart';
 
@@ -11,8 +12,8 @@ class TreatmentForm extends StatefulWidget {
 }
 
 class _TreatmentFormState extends State<TreatmentForm> {
-
-  final treatmentModel = treatments.map((e) => TreatmentFormModel(e, false)).toList();
+  final treatmentModel =
+      treatments.map((e) => TreatmentFormModel(e, false)).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,10 @@ class _TreatmentFormState extends State<TreatmentForm> {
               return CheckboxListTile(
                 value: treatmentModel[i].value,
                 title: Text(treatmentModel[i].treatment.name),
-                subtitle: Text(treatmentModel[i].treatment.cost.toString()),
+                subtitle: Text(
+                  AppConfig.numWithCurrency(treatmentModel[i].treatment.cost),
+                  style: AppConfig.numberStyle,
+                ),
                 onChanged: (value) {
                   setState(() {
                     treatmentModel[i].value = value;
@@ -41,7 +45,12 @@ class _TreatmentFormState extends State<TreatmentForm> {
         ElevatedButton(
           child: const Text('إضافة'),
           onPressed: () {
-            Navigator.pop(context, treatmentModel.where((e) => e.value).map((e) => e.treatment).toList());
+            Navigator.pop(
+                context,
+                treatmentModel
+                    .where((e) => e.value)
+                    .map((e) => e.treatment..date = DateTime.now())
+                    .toList());
           },
         ),
         const SizedBox(

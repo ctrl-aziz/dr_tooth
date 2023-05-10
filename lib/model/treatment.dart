@@ -21,6 +21,6 @@ class Treatment {
     return 'Treatment{id: $id, name: $name, cost: $cost, date: $date}';
   }
 
-  factory Treatment.fromJson(Map<dynamic, dynamic> json) => _$TreatmentFromJson(json);
+  factory Treatment.fromJson(Map<String, dynamic> json) => _$TreatmentFromJson(json);
   Map<String, dynamic> toJson() => _$TreatmentToJson(this);
 }

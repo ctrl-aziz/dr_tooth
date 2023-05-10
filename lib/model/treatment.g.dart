@@ -6,10 +6,10 @@ part of 'treatment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Treatment _$TreatmentFromJson(Map<dynamic, dynamic> json) => Treatment(
+Treatment _$TreatmentFromJson(Map<String, dynamic> json) => Treatment(
       id: json['id'] as String,
       name: json['name'] as String,
-      cost: (json['cost'] as num).toInt(),
+      cost: json['cost'] as int,
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );

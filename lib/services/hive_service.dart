@@ -13,6 +13,8 @@ class HiveService {
   HiveService(this._boxName);
 
 
+  Future<String> get boxPath => _openBox().then((value) => value.path!);
+
   Future<Box> _openBox() async {
     return await Hive.openBox(_boxName);
   }
@@ -47,6 +49,7 @@ class HiveService {
 
 class PatientHiveService extends HiveService{
   PatientHiveService() : super('patient');
+
 
   Future<Patient> getPatient(String id) async {
     final data = await super.get(id);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart' as intl;
 
 import '../constants/app_config.dart';
 import '../provider/patient_provider.dart';

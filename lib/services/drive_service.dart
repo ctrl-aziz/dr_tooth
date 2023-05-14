@@ -3,7 +3,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as ga;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as p;
 
 import 'secure_storage.dart';
 
@@ -16,40 +15,47 @@ final googleSignIn = GoogleSignIn(
   ],
 );
 
-class GoogleDrive {
+class DriveService {
   final storage = SecureStorage();
+
+  Future<AuthClient> authForFirstTime() async{
+    final googleSignInAccount = await googleSignIn.signIn();
+
+    if (googleSignInAccount == null) {
+      throw Exception('Google sign in aborted');
+    }
+
+    final googleAuth = await googleSignInAccount.authentication;
+
+    final authClient = authenticatedClient(
+      http.Client(),
+      AccessCredentials(
+        AccessToken(
+          'Bearer',
+          googleAuth.accessToken!,
+          DateTime.now().add(const Duration(days: 3)).toUtc(),
+        ),
+        googleAuth.accessToken,
+        ['email'],
+      ),
+    );
+
+    await storage.saveCredentials(authClient.credentials.accessToken,
+        authClient.credentials.refreshToken!);
+
+    return authClient;
+  }
 
   Future<AuthClient> authenticateWithGoogle() async {
     try {
       var credentials = await storage.getCredentials();
 
+      print("credentials: $credentials");
+
       if (credentials == null || DateTime.parse(credentials['expiry']).difference(DateTime.now()).inSeconds <= 0) {
-        final googleSignInAccount = await googleSignIn.signIn();
-
-        if (googleSignInAccount == null) {
-          throw Exception('Google sign in aborted');
-        }
-
-        final googleAuth = await googleSignInAccount.authentication;
-
-        final authClient = authenticatedClient(
-          http.Client(),
-          AccessCredentials(
-            AccessToken(
-              'Bearer',
-              googleAuth.accessToken!,
-              DateTime.now().add(const Duration(days: 3)).toUtc(),
-            ),
-            googleAuth.accessToken,
-            ['email'],
-          ),
-        );
-
-        await storage.saveCredentials(authClient.credentials.accessToken,
-            authClient.credentials.refreshToken!);
-
-        return authClient;
-      } else {
+        return authForFirstTime();
+      }
+      else {
         final authClient = authenticatedClient(
           http.Client(),
           AccessCredentials(
@@ -62,6 +68,8 @@ class GoogleDrive {
             ['email'],
           ),
         );
+
+        print("authClient: ${authClient.credentials}");
         return authClient;
       }
     } catch (e) {
@@ -104,7 +112,7 @@ class GoogleDrive {
     }
   }
 
-  uploadFileToGoogleDrive(File file) async {
+  Future<void> uploadFileToGoogleDrive(File file) async {
     var client = await authenticateWithGoogle();
     var drive = ga.DriveApi(client);
     String? folderId = await _getFolderId(drive);
@@ -113,7 +121,7 @@ class GoogleDrive {
     } else {
       ga.File fileToUpload = ga.File();
       fileToUpload.parents = [folderId];
-      fileToUpload.name = p.basename(file.absolute.path);
+      fileToUpload.name = DateTime.now().toString().split('.').first;
       var response = await drive.files.create(
         fileToUpload,
         uploadMedia: ga.Media(file.openRead(), file.lengthSync()),
@@ -138,11 +146,30 @@ class GoogleDrive {
     final folderId = folders.files!.first.id;
     final files = await drive.files.list(
       q: "'$folderId' in parents and trashed = false",
-      pageSize: 5
+      pageSize: 5,
     );
 
     print("files.files: ${files.files}");
 
     return files.files!;
   }
+
+  Future<void> downloadFile(String fileId, String path) async {
+    var client = await authenticateWithGoogle();
+    var drive = ga.DriveApi(client);
+
+    final response = await drive.files.get(fileId, downloadOptions: ga.DownloadOptions.fullMedia) as ga.Media;
+
+    List<int> dataStore = [];
+    response.stream.listen((data) {
+      print("DataReceived: ${data.length}");
+      dataStore.insertAll(dataStore.length, data);
+    }, onDone: () async {
+      File file = File(path);
+      await file.writeAsBytes(dataStore);
+    }, onError: (error) {
+      print("Some Error");
+    });
+  }
+
 }

@@ -178,8 +178,8 @@ class PatientView extends ConsumerWidget {
                           ).toJson(),
                         );
                   }
-                  ref.refresh(patientProvider(id));
-                  ref.refresh(patientListProvider);
+                  ref.invalidate(patientProvider(id));
+                  ref.invalidate(patientListProvider);
                 });
               },
               child: const Icon(Icons.add),

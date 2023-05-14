@@ -8,7 +8,7 @@ class TreatmentFormModel{
 
   bool get value => _value;
 
-  set value(val){
+  set value(bool val){
     if(val == _value) return;
     _value = val;
   }

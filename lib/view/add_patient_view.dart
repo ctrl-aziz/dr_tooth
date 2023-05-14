@@ -111,7 +111,7 @@ class _AddPatientViewState extends ConsumerState<AddPatientView> {
                             payments: [],
                           );
                           ref.read(patientStorageProvider).save(newPatient.toJson());
-                          ref.refresh(patientListProvider);
+                          ref.invalidate(patientListProvider);
                           Navigator.of(context).pop();
                         }
                       },

@@ -1,38 +1,101 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:googleapis/drive/v3.dart';
+import 'dart:io' as io;
 
 import '../provider/patient_provider.dart';
-import '../services/drive_service.dart';
+
+final _driveFilesProvider = FutureProvider<List<File>>((ref) async {
+  return ref.read(driveProvider).getFilesInFolder();
+});
 
 class BackupView extends ConsumerWidget {
   const BackupView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('النسخ الاحتياطي/الاستعادة'),
-      ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              TextButton(
-                onPressed: () async{
-                  final boxPath = await ref.read(patientStorageProvider).boxPath;
-                  print("boxPath: $boxPath");
-                  final backupFile = File(boxPath);
-                  // await GoogleDrive().authenticateWithGoogle();
-                  // await GoogleDrive().uploadFileToGoogleDrive(backupFile);
-                  await GoogleDrive().getFilesInFolder();
-                },
-                child: const Text("احتفاظ"),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('النسخ الاحتياطي/الاستعادة'),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                final path = await ref.read(patientStorageProvider).boxPath;
+                final io.File file = io.File(path);
+                await ref.read(driveProvider).uploadFileToGoogleDrive(file);
+                ref.invalidate(_driveFilesProvider);
+              },
+              icon: const Icon(
+                Icons.backup,
               ),
-            ],
-          ),
-        ],
+            )
+          ],
+        ),
+        body: ref.watch(_driveFilesProvider).when(
+              data: (files) {
+                return ListView.builder(
+                  itemCount: files.length,
+                  itemBuilder: (context, i) {
+                    final File file = files[i];
+                    // print("${file}");
+
+                    return ListTile(
+                      onTap: () async {
+                        final downloadIt = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: AlertDialog(
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('هل تريد استعادة هذه النسخة'),
+                                    Text(file.name!),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, false);
+                                    },
+                                    child: const Text('لا'),
+                                  ),
+
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                    },
+                                    child: const Text('نعم'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+
+                        if (downloadIt??false) {
+                          print(file.id);
+                          final path = await ref.read(patientStorageProvider).boxPath;
+                          await ref.read(driveProvider).downloadFile(file.id!, path).then((value) => ref.invalidate(patientListProvider));
+                        }
+                      },
+                      title: Text("نسخة بتاريخ: ${file.name}"),
+                    );
+                  },
+                );
+              },
+              error: (e, s) => TextButton(
+                onPressed: () async{
+                  await ref.read(driveProvider).authForFirstTime();
+                  ref.invalidate(_driveFilesProvider);
+                },
+                child: const Text("سجل دخول"),
+              ),
+              loading: () => const CircularProgressIndicator(),
+            ),
       ),
     );
   }

@@ -1,35 +1,34 @@
 import 'package:dr_tooth/model/payment.dart';
 import 'package:flutter/foundation.dart';
 
-import 'model/treatment.dart';
-
-final treatments = [
-  Treatment(
-    id: UniqueKey().toString(),
-    name: "قلع",
-    cost: 300,
-  ),
-  Treatment(
-    id: UniqueKey().toString(),
-    name: "حشي",
-    cost: 500,
-  ),
-  Treatment(
-    id: UniqueKey().toString(),
-    name: "سحب عصب",
-    cost: 350,
-  ),
-  Treatment(
-    id: UniqueKey().toString(),
-    name: "تنضيف لثة",
-    cost: 400,
-  ),
-  Treatment(
-    id: UniqueKey().toString(),
-    name: "اشياء اخرى",
-    cost: 450,
-  ),
-];
+//
+// final treatments = [
+//   Treatment(
+//     id: UniqueKey().toString(),
+//     name: "قلع",
+//     cost: 300,
+//   ),
+//   Treatment(
+//     id: UniqueKey().toString(),
+//     name: "حشي",
+//     cost: 500,
+//   ),
+//   Treatment(
+//     id: UniqueKey().toString(),
+//     name: "سحب عصب",
+//     cost: 350,
+//   ),
+//   Treatment(
+//     id: UniqueKey().toString(),
+//     name: "تنضيف لثة",
+//     cost: 400,
+//   ),
+//   Treatment(
+//     id: UniqueKey().toString(),
+//     name: "اشياء اخرى",
+//     cost: 450,
+//   ),
+// ];
 
 final payments = [
   Payment(

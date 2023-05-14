@@ -1,39 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../constants/app_config.dart';
-import '../../data.dart';
-import 'treatment_form_model.dart';
+import '../../provider/treatment_provider.dart';
 
-class TreatmentForm extends StatefulWidget {
-  const TreatmentForm({Key? key}) : super(key: key);
+class TreatmentForm extends ConsumerWidget {
+  const TreatmentForm({
+    Key? key,
+  }) : super(key: key);
 
-  @override
-  State<TreatmentForm> createState() => _TreatmentFormState();
-}
 
-class _TreatmentFormState extends State<TreatmentForm> {
-  final treatmentModel =
-      treatments.map((e) => TreatmentFormModel(e, false)).toList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final treatment = ref.watch(treatmentProvider);
+    // final treatmentModel = ref.watch(treatmentModelProvider);
+
     return Column(
       children: [
         Expanded(
           child: ListView.builder(
-            itemCount: treatments.length,
+            itemCount: treatment.treatments.length,
             itemBuilder: (context, i) {
               return CheckboxListTile(
-                value: treatmentModel[i].value,
-                title: Text(treatmentModel[i].treatment.name),
+                value: treatment.treatmentsModel[i].value,
+                title: Text(treatment.treatmentsModel[i].treatment.name),
                 subtitle: Text(
-                  AppConfig.numWithCurrency(treatmentModel[i].treatment.cost),
+                  AppConfig.numWithCurrency(
+                      treatment.treatmentsModel[i].treatment.cost),
                   style: AppConfig.numberStyle,
                 ),
                 onChanged: (value) {
-                  setState(() {
-                    treatmentModel[i].value = value;
-                  });
+                  treatment.selectItem(i);
                 },
               );
             },
@@ -47,7 +45,7 @@ class _TreatmentFormState extends State<TreatmentForm> {
           onPressed: () {
             Navigator.pop(
                 context,
-                treatmentModel
+                treatment.treatmentsModel
                     .where((e) => e.value)
                     .map((e) => e.treatment..date = DateTime.now())
                     .toList());

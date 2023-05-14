@@ -8,14 +8,14 @@ class AddDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
+    return const Dialog(
       child: DefaultTabController(
         length: 2,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               TabBar(
                 tabs: [
                   Tab(text: 'دفعة'),

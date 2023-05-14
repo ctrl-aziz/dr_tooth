@@ -1,15 +1,9 @@
-import 'dart:io';
 
-import 'package:dr_tooth/constants/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart' as intl;
 
-import '../data.dart';
-import '../provider/patient_provider.dart';
-import '../services/drive_service.dart';
 import 'backup_view.dart';
+import 'treatments_view.dart';
 
 class SettingView extends ConsumerWidget {
   const SettingView({Key? key}) : super(key: key);
@@ -20,23 +14,44 @@ class SettingView extends ConsumerWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Settings'),
+          title: const Text('الاعدادات'),
         ),
         body: Column(
           children: [
+
             ListTile(
-              title: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BackupView(),
-                    ),
-                  );
-                },
-                child: Text('النسح الاحتياطي'),
-              ),
+              title: const Text('النسح الاحتياطي'),
+              subtitle:
+              const Text('قم بإنشاء نسخ احتياطية لبياناتك لحمايتها'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BackupView(),
+                  ),
+                );
+              },
             ),
+            const Divider(),
+
+            ListTile(
+              title: const Text('خدماتك'),
+              subtitle:
+              const Text('ادخل انواع العلاج التي تقدمها'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TreatmentsView(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+
+
             // ListView.builder(
             //   itemCount: treatments.length,
             //   itemBuilder: (context, i) {

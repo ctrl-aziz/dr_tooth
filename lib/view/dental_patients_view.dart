@@ -13,8 +13,7 @@ class DentalPatientsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final patients = ref.watch(patientListProvider);
-    final filteredPatients = ref.watch(filteredPatientProvider);
+    final patients = ref.watch(patientsProvider);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -37,66 +36,56 @@ class DentalPatientsView extends ConsumerWidget {
             ),
           ],
         ),
-        body: patients.when(
-          data: (patients) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: CustomSearch(
-                    hintText: 'ابحث عن مريض',
-                    items: patients,
-                    onFiltered: (searchText) {
-                      ref.read(filteredPatientProvider.notifier).state =
-                          patients
-                              .where((item) => item.name
-                                  .toLowerCase()
-                                  .contains(searchText.toLowerCase()))
-                              .toList();
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: (filteredPatients ?? patients).length,
-                    itemBuilder: (BuildContext context, int i) {
-                      final item = (filteredPatients ?? patients)[i];
-                      final int age = item.age;
-                      return Card(
-                        child: ListTile(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PatientView(
-                                  id: item.id,
-                                ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: CustomSearch(
+                hintText: 'ابحث عن مريض',
+                items: patients.patients,
+                onFiltered: patients.filteredPatientProvider,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async{
+                  patients.getAllPatient();
+                },
+                child: ListView.builder(
+                  itemCount: (patients.filteredPatients ?? patients.patients).length,
+                  itemBuilder: (BuildContext context, int i) {
+                    final item = (patients.filteredPatients ?? patients.patients)[i];
+                    final int age = item.age;
+                    return Card(
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PatientView(
+                                id: item.id,
                               ),
-                            );
-                          },
-                          title: Text(item.name),
-                          subtitle: Text(
-                            AppConfig.numWithCurrency(item.debts),
-                            style: AppConfig.numberStyle,
-                          ),
-                          leading: Text((i + 1).toString()),
-                          trailing:
-                              Icon(age < 18 ? Icons.child_care : Icons.person),
+                            ),
+                          );
+                        },
+                        title: Text(item.name),
+                        subtitle: Text(
+                          AppConfig.numWithCurrency(item.debts),
+                          style: AppConfig.numberStyle,
                         ),
-                      );
-                    },
-                  ),
+                        leading: Text((i + 1).toString()),
+                        trailing:
+                        Icon(age < 18 ? Icons.child_care : Icons.person),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            );
-          },
-          error: (e, s) {
-            return Text("Error: $e");
-          },
-          loading: () => const CircularProgressIndicator(),
+              ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

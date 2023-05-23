@@ -15,6 +15,11 @@ class Patient {
   final List<Treatment> treatments;
   final List<Payment> payments;
 
+  @override
+  String toString() {
+    return 'Patient{id: $id, name: $name, gender: $gender, age: $age, phoneNumber: $phoneNumber, debts: $debts, treatments: $treatments, payments: $payments}';
+  }
+
   Patient({
     required this.id,
     required this.name,

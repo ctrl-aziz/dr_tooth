@@ -1,11 +1,12 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as ga;
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 import 'secure_storage.dart';
-
 
 final googleSignIn = GoogleSignIn(
   scopes: [
@@ -18,7 +19,7 @@ final googleSignIn = GoogleSignIn(
 class DriveService {
   final storage = SecureStorage();
 
-  Future<AuthClient> authForFirstTime() async{
+  Future<AuthClient> authForFirstTime() async {
     final googleSignInAccount = await googleSignIn.signIn();
 
     if (googleSignInAccount == null) {
@@ -50,12 +51,15 @@ class DriveService {
     try {
       var credentials = await storage.getCredentials();
 
-      print("credentials: $credentials");
+      debugPrint("credentials: $credentials");
 
-      if (credentials == null || DateTime.parse(credentials['expiry']).difference(DateTime.now()).inSeconds <= 0) {
+      if (credentials == null ||
+          DateTime.parse(credentials['expiry'])
+                  .difference(DateTime.now())
+                  .inSeconds <=
+              0) {
         return authForFirstTime();
-      }
-      else {
+      } else {
         final authClient = authenticatedClient(
           http.Client(),
           AccessCredentials(
@@ -69,11 +73,11 @@ class DriveService {
           ),
         );
 
-        print("authClient: ${authClient.credentials}");
+        debugPrint("authClient: ${authClient.credentials}");
         return authClient;
       }
     } catch (e) {
-      print('Error authenticating with Google: $e');
+      debugPrint('Error authenticating with Google: $e');
       rethrow;
     }
   }
@@ -89,7 +93,7 @@ class DriveService {
       );
       final files = found.files;
       if (files == null) {
-        print("Sign-in first Error");
+        debugPrint("Sign-in first Error");
         return null;
       }
 
@@ -103,11 +107,11 @@ class DriveService {
       folder.name = folderName;
       folder.mimeType = mimeType;
       final folderCreation = await driveApi.files.create(folder);
-      print("Folder ID: ${folderCreation.id}");
+      debugPrint("Folder ID: ${folderCreation.id}");
 
       return folderCreation.id;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       return null;
     }
   }
@@ -117,7 +121,7 @@ class DriveService {
     var drive = ga.DriveApi(client);
     String? folderId = await _getFolderId(drive);
     if (folderId == null) {
-      print("Sign-in first Error");
+      debugPrint("Sign-in first Error");
     } else {
       ga.File fileToUpload = ga.File();
       fileToUpload.parents = [folderId];
@@ -126,7 +130,7 @@ class DriveService {
         fileToUpload,
         uploadMedia: ga.Media(file.openRead(), file.lengthSync()),
       );
-      print(response);
+      debugPrint(response.toString());
     }
   }
 
@@ -139,7 +143,7 @@ class DriveService {
     );
 
     if (folders.files?.isEmpty == null) {
-      print('Could not find folder with name: dr_tooth');
+      debugPrint('Could not find folder with name: dr_tooth');
       return [];
     }
 
@@ -149,27 +153,29 @@ class DriveService {
       pageSize: 5,
     );
 
-    print("files.files: ${files.files}");
+    debugPrint("files.files: ${files.files}");
 
     return files.files!;
   }
 
-  Future<void> downloadFile(String fileId, String path) async {
+  Future<void> downloadFile(String fileId, String path, {Function()? onDone}) async {
     var client = await authenticateWithGoogle();
     var drive = ga.DriveApi(client);
 
-    final response = await drive.files.get(fileId, downloadOptions: ga.DownloadOptions.fullMedia) as ga.Media;
+    final response = await drive.files
+        .get(fileId, downloadOptions: ga.DownloadOptions.fullMedia) as ga.Media;
 
     List<int> dataStore = [];
     response.stream.listen((data) {
-      print("DataReceived: ${data.length}");
+      debugPrint("DataReceived: ${data.length}");
       dataStore.insertAll(dataStore.length, data);
     }, onDone: () async {
+      await Hive.box('patient').close();
       File file = File(path);
       await file.writeAsBytes(dataStore);
+      if(onDone != null) onDone();
     }, onError: (error) {
-      print("Some Error");
+      debugPrint("Some Error");
     });
   }
-
 }

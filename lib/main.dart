@@ -8,6 +8,9 @@ import 'view/dental_patients_view.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox('patient');
+  await Hive.openBox('treatment');
+  await Hive.openBox('payment');
   runApp(const ProviderScope(child: MyApp()));
 }
 

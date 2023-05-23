@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../model/patient.dart';
 import '../provider/patient_provider.dart';
+import '../services/hive_service.dart';
 import '../widget/custom_text_field.dart';
 
 class AddPatientView extends ConsumerStatefulWidget {
@@ -110,8 +111,10 @@ class _AddPatientViewState extends ConsumerState<AddPatientView> {
                             treatments: [],
                             payments: [],
                           );
-                          ref.read(patientStorageProvider).save(newPatient.toJson());
-                          ref.invalidate(patientListProvider);
+                          ref.read(patientStorageProvider).save(newPatient.toJson()).then((value) {
+                            ref.read(patientsProvider).getAllPatient();
+                          });
+                          // ref.invalidate(patientListProvider);
                           Navigator.of(context).pop();
                         }
                       },

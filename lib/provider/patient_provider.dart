@@ -1,42 +1,52 @@
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../model/patient.dart';
 import '../services/drive_service.dart';
 import '../services/hive_service.dart';
 
-final patientStorageProvider = Provider<PatientHiveService>((ref) {
-  return PatientHiveService();
+
+final patientProvider = StateProvider.family<Patient, String>((ref, id) {
+  return ref.read(patientsProvider).getPatient(id);
 });
 
-final patientListProvider = FutureProvider<List<Patient>>((ref) async {
-  final items = await ref.read(patientStorageProvider).getAllPatient();
-  return items;
-});
-
-final patientProvider = FutureProvider.family<Patient, String>((ref, id) async {
-  final item = await ref.read(patientStorageProvider).getPatient(id);
-  return item;
-});
-
-final filteredPatientProvider = StateProvider<List<Patient>?>((ref) {
-  return;
-});
 
 final driveProvider = Provider<DriveService>((ref) {
   return DriveService();
 });
 
-
-
-class CounterState extends StateNotifier<int> {
-  CounterState() : super(0);
-
-  void increment() => state++;
-}
-
-// Define a provider for the state class
-final counterProvider = StateNotifierProvider<CounterState, int>((ref) {
-  return CounterState();
+final patientsProvider = ChangeNotifierProvider<PatientsProvider>((ref) {
+  return PatientsProvider();
 });
 
+class PatientsProvider extends ChangeNotifier{
+  final PatientHiveService _patientHiveService = PatientHiveService();
+
+  List<Patient> _patients = [];
+  List<Patient> get patients => _patients;
+  List<Patient>? _filteredPatients;
+  List<Patient>? get filteredPatients => _filteredPatients;
+
+  PatientsProvider(){
+    getAllPatient();
+  }
+
+  void getAllPatient() {
+    _patients = _patientHiveService.getAllPatient();
+    notifyListeners();
+  }
+
+  void filteredPatientProvider(searchText) {
+    _filteredPatients =
+        _patients
+            .where((item) => item.name
+            .toLowerCase()
+            .contains(searchText.toLowerCase()))
+            .toList();
+    notifyListeners();
+  }
+
+  Patient getPatient(String id){
+    return _patientHiveService.getPatient(id);
+  }
+}

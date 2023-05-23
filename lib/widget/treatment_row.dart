@@ -10,7 +10,6 @@ class TreatmentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(_treatment.date);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       child: Column(

@@ -1,9 +1,12 @@
+import 'package:dr_tooth/view/dental_patients_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/drive/v3.dart';
+import 'package:hive/hive.dart';
 import 'dart:io' as io;
 
 import '../provider/patient_provider.dart';
+import '../services/hive_service.dart';
 
 final _driveFilesProvider = FutureProvider<List<File>>((ref) async {
   return ref.read(driveProvider).getFilesInFolder();
@@ -22,8 +25,8 @@ class BackupView extends ConsumerWidget {
           actions: [
             IconButton(
               onPressed: () async {
-                final path = await ref.read(patientStorageProvider).boxPath;
-                final io.File file = io.File(path);
+                final path = ref.read(patientStorageProvider).boxPath;
+                final io.File file = io.File(path!);
                 await ref.read(driveProvider).uploadFileToGoogleDrive(file);
                 ref.invalidate(_driveFilesProvider);
               },
@@ -63,7 +66,6 @@ class BackupView extends ConsumerWidget {
                                     },
                                     child: const Text('لا'),
                                   ),
-
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context, true);
@@ -76,10 +78,26 @@ class BackupView extends ConsumerWidget {
                           },
                         );
 
-                        if (downloadIt??false) {
-                          print(file.id);
-                          final path = await ref.read(patientStorageProvider).boxPath;
-                          await ref.read(driveProvider).downloadFile(file.id!, path).then((value) => ref.invalidate(patientListProvider));
+                        if (downloadIt ?? false) {
+                          debugPrint(file.id);
+                          final path = ref.read(patientStorageProvider).boxPath;
+                          await ref.read(driveProvider).downloadFile(
+                            file.id!,
+                            path!,
+                            onDone: () async {
+                              await Hive.openBox('patient').then((value) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                    const DentalPatientsView(),
+                                  ),
+                                      (route) => false,
+                                );
+                                ref.read(patientsProvider).getAllPatient();
+                              });
+                            },
+                          );
                         }
                       },
                       title: Text("نسخة بتاريخ: ${file.name}"),
@@ -87,14 +105,16 @@ class BackupView extends ConsumerWidget {
                   },
                 );
               },
-              error: (e, s) => TextButton(
-                onPressed: () async{
-                  await ref.read(driveProvider).authForFirstTime();
-                  ref.invalidate(_driveFilesProvider);
-                },
-                child: const Text("سجل دخول"),
+              error: (e, s) => Center(
+                child: TextButton(
+                  onPressed: () async {
+                    await ref.read(driveProvider).authForFirstTime();
+                    ref.invalidate(_driveFilesProvider);
+                  },
+                  child: const Text("سجل دخول"),
+                ),
               ),
-              loading: () => const CircularProgressIndicator(),
+              loading: () => const Center(child: CircularProgressIndicator()),
             ),
       ),
     );

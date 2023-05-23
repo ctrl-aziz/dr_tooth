@@ -21,7 +21,7 @@ final treatmentStorageProvider = Provider<TreatmentHiveService>((ref) {
 // });
 
 
-final treatmentProvider = ChangeNotifierProvider<TreatmentProvider>((ref) {
+final treatmentProvider = ChangeNotifierProvider.autoDispose<TreatmentProvider>((ref) {
   return TreatmentProvider();
 });
 
@@ -35,11 +35,15 @@ class TreatmentProvider extends ChangeNotifier{
   List<TreatmentFormModel> get treatmentsModel => _modelItems;
 
   TreatmentProvider(){
+    _hiveService.getTreatmentStream().listen((event) {
+      _getTreatments().then((value) => _treatmentModel());
+    });
     _getTreatments().then((value) => _treatmentModel());
   }
 
   Future<void> _getTreatments() async {
     final items = await _hiveService.getAllTreatment();
+    _items.clear();
     _items.addAll(items);
     notifyListeners();
   }
@@ -53,4 +57,5 @@ class TreatmentProvider extends ChangeNotifier{
     _modelItems[i].value = !_modelItems[i].value;
     notifyListeners();
   }
+
 }

@@ -8,9 +8,9 @@ import '../model/payment.dart';
 import '../provider/patient_provider.dart';
 import '../services/hive_service.dart';
 import '../widget/add_dialog/add_dialog.dart';
-import '../widget/divider_widget.dart';
 import '../widget/patient_row.dart';
 import '../widget/treatment_row.dart';
+import 'add_patient_view.dart';
 
 class PatientView extends ConsumerWidget {
   final String id;
@@ -25,15 +25,63 @@ class PatientView extends ConsumerWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('بيانات المريض'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddPatientView(patient: patient),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.edit),
+            ),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: AlertDialog(
+                        title: Text('هل تريد حذف بيانات المريض ${patient.name}؟', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black87),),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('لا'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              ref.read(patientStorageProvider).delete(patient.id).then((value) {
+                                ref.read(patientsProvider).getAllPatient();
+                                Navigator.pop(context);
+                              });
+                            },
+                            child: const Text('نعم'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ).then((value) {
+                  Navigator.pop(context);
+                });
+              },
+              icon: const Icon(Icons.delete),
+            ),
+          ],
+        ),
         body: SingleChildScrollView(
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  height: 25,
-                ),
-                const DividerWidget(title: "بيانات المريض"),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * .3,
                   child: Row(
@@ -101,7 +149,13 @@ class PatientView extends ConsumerWidget {
                                     return Directionality(
                                       textDirection: TextDirection.rtl,
                                       child: AlertDialog(
-                                        title: Text('هل تريد حذف (${e.name}) بتاريخ ${e.date!.year}/${e.date!.month}/${e.date!.day} ', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black87),),
+                                        title: Text(
+                                          'هل تريد حذف (${e.name}) بتاريخ ${e.date!.year}/${e.date!.month}/${e.date!.day} ',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(color: Colors.black87),
+                                        ),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
@@ -111,21 +165,31 @@ class PatientView extends ConsumerWidget {
                                           ),
                                           TextButton(
                                             onPressed: () {
-                                              ref.read(patientStorageProvider).save(
-                                                Patient(
-                                                  id: patient.id,
-                                                  name: patient.name,
-                                                  gender: patient.gender,
-                                                  age: patient.age,
-                                                  debts: patient.debts,
-                                                  phoneNumber: patient.phoneNumber,
-                                                  treatments: patient.treatments..remove(e),
-                                                  payments: patient.payments,
-                                                ).toJson(),
-                                              ).then((value) {
+                                              ref
+                                                  .read(patientStorageProvider)
+                                                  .save(
+                                                    Patient(
+                                                      id: patient.id,
+                                                      name: patient.name,
+                                                      gender: patient.gender,
+                                                      age: patient.age,
+                                                      debts: patient.debts,
+                                                      phoneNumber:
+                                                          patient.phoneNumber,
+                                                      treatments:
+                                                          patient.treatments
+                                                            ..remove(e),
+                                                      payments:
+                                                          patient.payments,
+                                                    ).toJson(),
+                                                  )
+                                                  .then((value) {
                                                 Navigator.pop(context);
-                                                ref.invalidate(patientProvider(id));
-                                                ref.read(patientsProvider).getAllPatient();
+                                                ref.invalidate(
+                                                    patientProvider(id));
+                                                ref
+                                                    .read(patientsProvider)
+                                                    .getAllPatient();
                                               });
                                             },
                                             child: const Text('نعم'),
@@ -145,7 +209,13 @@ class PatientView extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const DividerWidget(title: "الدفعات "),
+                // const DividerWidget(title: "الدفعات "),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Text('الدفعات',
+                      style: Theme.of(context).textTheme.bodyLarge),
+                ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * .5,
                   child: ListView.separated(
@@ -161,7 +231,13 @@ class PatientView extends ConsumerWidget {
                               return Directionality(
                                 textDirection: TextDirection.rtl,
                                 child: AlertDialog(
-                                  title: Text('هل تريد حذف (${payment.amount}) بتاريخ ${payment.date!.year}/${payment.date!.month}/${payment.date!.day} ', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.black87),),
+                                  title: Text(
+                                    'هل تريد حذف (${payment.amount}) بتاريخ ${payment.date!.year}/${payment.date!.month}/${payment.date!.day} ',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(color: Colors.black87),
+                                  ),
                                   actions: [
                                     TextButton(
                                       onPressed: () {
@@ -171,21 +247,28 @@ class PatientView extends ConsumerWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        ref.read(patientStorageProvider).save(
-                                          Patient(
-                                            id: patient.id,
-                                            name: patient.name,
-                                            gender: patient.gender,
-                                            age: patient.age,
-                                            debts: patient.debts,
-                                            phoneNumber: patient.phoneNumber,
-                                            treatments: patient.treatments,
-                                            payments: patient.payments..remove(payment),
-                                          ).toJson(),
-                                        ).then((value) {
+                                        ref
+                                            .read(patientStorageProvider)
+                                            .save(
+                                              Patient(
+                                                id: patient.id,
+                                                name: patient.name,
+                                                gender: patient.gender,
+                                                age: patient.age,
+                                                debts: patient.debts,
+                                                phoneNumber:
+                                                    patient.phoneNumber,
+                                                treatments: patient.treatments,
+                                                payments: patient.payments
+                                                  ..remove(payment),
+                                              ).toJson(),
+                                            )
+                                            .then((value) {
                                           Navigator.pop(context);
                                           ref.invalidate(patientProvider(id));
-                                          ref.read(patientsProvider).getAllPatient();
+                                          ref
+                                              .read(patientsProvider)
+                                              .getAllPatient();
                                         });
                                       },
                                       child: const Text('نعم'),
@@ -235,33 +318,33 @@ class PatientView extends ConsumerWidget {
               },
             ).then((value) {
               debugPrint("value.toString(): ${value.toString()}");
-              if(value != null){
+              if (value != null) {
                 if (value is Payment) {
                   ref.read(patientStorageProvider).save(
-                    Patient(
-                      id: patient.id,
-                      name: patient.name,
-                      gender: patient.gender,
-                      age: patient.age,
-                      debts: patient.debts,
-                      phoneNumber: patient.phoneNumber,
-                      treatments: patient.treatments,
-                      payments: patient.payments..add(value),
-                    ).toJson(),
-                  );
+                        Patient(
+                          id: patient.id,
+                          name: patient.name,
+                          gender: patient.gender,
+                          age: patient.age,
+                          debts: patient.debts,
+                          phoneNumber: patient.phoneNumber,
+                          treatments: patient.treatments,
+                          payments: patient.payments..add(value),
+                        ).toJson(),
+                      );
                 } else {
                   ref.read(patientStorageProvider).save(
-                    Patient(
-                      id: patient.id,
-                      name: patient.name,
-                      gender: patient.gender,
-                      age: patient.age,
-                      debts: patient.debts,
-                      phoneNumber: patient.phoneNumber,
-                      treatments: patient.treatments..addAll(value),
-                      payments: patient.payments,
-                    ).toJson(),
-                  );
+                        Patient(
+                          id: patient.id,
+                          name: patient.name,
+                          gender: patient.gender,
+                          age: patient.age,
+                          debts: patient.debts,
+                          phoneNumber: patient.phoneNumber,
+                          treatments: patient.treatments..addAll(value),
+                          payments: patient.payments,
+                        ).toJson(),
+                      );
                 }
               }
               // ref.invalidate(patientProvider(id));

@@ -20,7 +20,10 @@ class DriveService {
   final storage = SecureStorage();
 
   Future<AuthClient> authForFirstTime() async {
+    try{
+
     final googleSignInAccount = await googleSignIn.signIn();
+    print("googleSignInAccount: $googleSignInAccount");
 
     if (googleSignInAccount == null) {
       throw Exception('Google sign in aborted');
@@ -36,15 +39,19 @@ class DriveService {
           googleAuth.accessToken!,
           DateTime.now().add(const Duration(days: 3)).toUtc(),
         ),
-        googleAuth.accessToken,
-        ['email'],
-      ),
+        googleAuth.accessToken, ['email'],),
     );
+
 
     await storage.saveCredentials(authClient.credentials.accessToken,
         authClient.credentials.refreshToken!);
 
     return authClient;
+    }catch (e){
+      print(e);
+      rethrow;
+    }
+
   }
 
   Future<AuthClient> authenticateWithGoogle() async {

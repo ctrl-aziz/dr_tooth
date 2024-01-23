@@ -1,6 +1,8 @@
+import 'package:dr_tooth/view/developer_view.dart';
 import 'package:dr_tooth/view/statistics_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../model/patient.dart';
 import '../provider/patient_provider.dart';
@@ -67,6 +69,26 @@ class SettingView extends ConsumerWidget {
               },
             ),
             const Divider(),
+            ListTile(
+              title: const Text('معلومات المطور'),
+              subtitle: const Text('يمكنك التواصل مع المطور من هنا'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                final patients = ref.read(patientsProvider).patients;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DeveloperView(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            const Spacer(),
+            const Text(
+              "اصدار التطبيق: v1.0.0",
+            ),
+            const SizedBox(height: 5.0,),
           ],
         ),
       ),
